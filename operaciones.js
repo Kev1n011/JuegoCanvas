@@ -19,10 +19,16 @@ var balas = [];
 const player_sprite = new Image();
 player_sprite.src = "./imagenes/player/player.png"
 
-
-
 player_sprite.onload = function () {
     ctx.drawImage(player_sprite, this.x, this.y, 200, 100);
+};
+
+//SPRITES DEL ENEMIGO
+const enemigo_sprite = new Image();
+enemigo_sprite.src = "./imagenes/Enemigos/enemigo1.png"
+
+enemigo_sprite.onload = function () {
+    ctx.drawImage(enemigo_sprite, this.x, this.y, 200, 100);
 };
 
 const imagen_bala = new Image();
@@ -39,17 +45,12 @@ function sonido_disparo() {
 
 }
 
-
-
-
-
 class Player {
-    constructor(x, y, ancho, alto, color) {
+    constructor(x, y, ancho, alto) {
         this.x = x;
         this.y = y;
         this.ancho = ancho;
         this.alto = alto;
-        this.color = color;
     }
 
     dibujar() {
@@ -74,10 +75,62 @@ class Player {
 
 }
 
+class Enemigo {
+    constructor(x, y, ancho, alto, puntos_hp) {
+        this.x = x;
+        this.y = y;
+        this.ancho = ancho;
+        this.alto = alto;
+        this.puntos_hp = puntos_hp;
+    }
 
-const player = new Player(100, 500, 100, 100, "red");
+    dibujar() {
+        ctx.drawImage(enemigo_sprite, this.x, this.y, 50, 50);
+    }
+
+  
+}
 
 
+
+const player = new Player(100, 500, 100, 100);
+
+
+//AQUÍ, SE CREAN LAS FILAS DE LOS ENEMIGOS CON UN FOR QUE CREA LOS OBJETOS Y LOS ALMACENA EN UN ARREGLO
+let salto_posicion_x = 80;
+let salto_posicion_y = 50;
+let enemigo1_x = 300;
+let enemigo1_y = 100;
+
+const enemigos_1 = {};
+let filas_enemigos = 0;
+let columnas_enemigos = 10;
+let bandera_filas = 0;
+
+
+//SE CREAN LOS ENEMIGOS
+while(bandera_filas < 3){
+    for (filas_enemigos; filas_enemigos < columnas_enemigos; filas_enemigos++){
+        console.log(filas_enemigos)
+        enemigo1_x += salto_posicion_x;
+        enemigos_1[filas_enemigos] = new Enemigo(enemigo1_x, enemigo1_y, 50, 50,1);
+        console.log(enemigos_1[filas_enemigos])
+    }
+    
+    enemigo1_x = 300
+    enemigo1_y += salto_posicion_y;
+    console.log(enemigo1_x)
+    columnas_enemigos += 10;
+    console.log(columnas_enemigos)
+    bandera_filas++;
+
+}
+
+setInterval(function() {
+    for (let i = 0; i < 30; i++) {
+        enemigos_1[i].x += 20; // Mueve los enemigos 20 en X cada segundo
+    }
+}, 1500); 
 
 paint();
 
@@ -136,13 +189,12 @@ function update() {
             ctx.drawImage(imagen_bala, bala.x, bala.y, 10, 30);
         });
 
-
-
-
+       
     }
 
 
 }
+
 
 function paint() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -151,10 +203,10 @@ function paint() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-
-
-
     player.dibujar();
+    for (let i = 0; i < 30; i++){
+        enemigos_1[i].dibujar();
+    }
     ctx.font = "30px Georgia";
     ctx.fillStyle = "gray";
     ctx.fillText("Score: " + score, 100, 30);
