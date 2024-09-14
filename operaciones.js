@@ -1,8 +1,6 @@
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
-
-
 var super_x = 100;
 var super_y = 100;
 var direccion = "";
@@ -88,13 +86,19 @@ class Enemigo {
         ctx.drawImage(enemigo_sprite, this.x, this.y, 50, 50);
     }
 
-  
+    manejarColision(bala) {
+        return this.x < bala.x + 10 && 
+            this.x + this.ancho > bala.x &&
+            this.y < bala.y + 30 && 
+            this.y + this.alto > bala.y;
+    }
+
+
 }
 
 
-
-const player = new Player(100, 500, 100, 100);
-
+//Se crea el jugador
+const player = new Player(50, 750);
 
 //AQUÍ, SE CREAN LAS FILAS DE LOS ENEMIGOS CON UN FOR QUE CREA LOS OBJETOS Y LOS ALMACENA EN UN ARREGLO
 let salto_posicion_x = 80;
@@ -102,21 +106,21 @@ let salto_posicion_y = 50;
 let enemigo1_x = 300;
 let enemigo1_y = 100;
 
-const enemigos_1 = {};
+const enemigos_1 = [];
 let filas_enemigos = 0;
 let columnas_enemigos = 10;
 let bandera_filas = 0;
 
 
 //SE CREAN LOS ENEMIGOS
-while(bandera_filas < 3){
-    for (filas_enemigos; filas_enemigos < columnas_enemigos; filas_enemigos++){
+while (bandera_filas < 3) {
+    for (filas_enemigos; filas_enemigos < columnas_enemigos; filas_enemigos++) {
         console.log(filas_enemigos)
         enemigo1_x += salto_posicion_x;
-        enemigos_1[filas_enemigos] = new Enemigo(enemigo1_x, enemigo1_y, 50, 50,1);
+        enemigos_1[filas_enemigos] = new Enemigo(enemigo1_x, enemigo1_y, 50, 50, 1);
         console.log(enemigos_1[filas_enemigos])
     }
-    
+
     enemigo1_x = 300
     enemigo1_y += salto_posicion_y;
     console.log(enemigo1_x)
@@ -125,15 +129,64 @@ while(bandera_filas < 3){
     bandera_filas++;
 
 }
+/*
+TODO:
+PARA QUE LA POSICION y CAMBIE, SE DEBE POSICIONARSE EN LA ULTIMA COLUMNA, Y VALIDAR LA COLISION CON EL LIMITE DEL CANVAS,
+SI COLISIONA, AVANZAR HACIA ABAJO Y RETROCEDER x
+*/
+let bajar_una_vez = true;
+let retroceder = false;
+let alcanzado_limite = false;
 
-setInterval(function() {
-    for (let i = 0; i < 30; i++) {
-        enemigos_1[i].x += 20; // Mueve los enemigos 20 en X cada segundo
+setInterval(function () {
+
+
+    //Si los enemigos alcanzan el límite y deben bajar una vez
+    if (alcanzado_limite && bajar_una_vez) {
+        for (let i = enemigos_1.length - 1; i >= 0; i--) {
+            enemigos_1[i].y += 50;  //Baja a todos los enemigos 50 puntos en Y
+            console.log("ada")
+
+            //Estos dos if son para evitar de que a la hora de que los enemigos bajen, estos bajen en diagonal.
+            //Esto ocurre debido a que se están ejecutando simultaneamente el codigo de bajar verticalmente y el de el movimiento horizontal
+            if (retroceder) {
+                enemigos_1[i].x += 20; 
+            } else {
+                enemigos_1[i].x -= 20; 
+            }
+        }
+
+        bajar_una_vez = false;
     }
-}, 1500); 
+
+    //Mueve los enemigos si no están retrocediendo
+    if (!retroceder) {
+        for (let i = enemigos_1.length - 1; i >= 0; i--) {
+            enemigos_1[i].x += 20; 
+            //Verifica si algún enemigo alcanza el límite del canvas
+            if (enemigos_1[i].x + enemigos_1[i].ancho >= 1400) {
+                alcanzado_limite = true;  
+                retroceder = true;
+                bajar_una_vez = true;  
+            }
+        }
+    }
+    if (retroceder) {
+        for (let i = enemigos_1.length - 1; i >= 0; i--) {
+            enemigos_1[i].x -= 20; 
+            //Verifica si algún enemigo alcanza el límite
+            if (enemigos_1[i].x <= 0) {
+                alcanzado_limite = true; 
+                retroceder = false;
+                bajar_una_vez = true; 
+            }
+        }
+    }
+    //Vuelve a activar  el movimiento después de retroceder
+
+}, 300);
 
 paint();
-
 var teclapresionada = {};
 document.addEventListener("keydown", function (e) {
     teclapresionada[e.code] = true;
@@ -168,28 +221,59 @@ function update() {
     if (!pausa) {
         switch (direccion) {
             case "izquierda":
+                if (velocidad == 0 && player.x >= 1400) {
+                    velocidad = 1.2;
+                    console.log(velocidad)
+                }
                 player.x -= velocidad;
-                if (player.x < -110) {
-                    player.x = 1500
+                if (player.x <= 0) {
+                    velocidad = 0;
 
                 }
                 break;
             case "derecha":
+                if (velocidad == 0 && player.x <= 0) {
+                    velocidad = 1.2;
+                    console.log(velocidad);
+                }
                 player.x += velocidad;
-                if (player.x > 1500) {
-                    player.x = -100;
+                if (player.x >= 1400) {
+                    velocidad = 0;
+                    console.log(player.x)
 
                 }
         }
 
-        // Actualiza y dibuja balas
 
-        balas.forEach((bala, index) => {
+        //Dibuja las balas disparadas por el jugador
+        balas.forEach((bala, balaIndex) => {
             bala.y -= bala.velocidad;
             ctx.drawImage(imagen_bala, bala.x, bala.y, 10, 30);
+
+            //Revisa colisiones entre las balas y los enemigos
+            for (let i = enemigos_1.length - 1; i >= 0; i--) {
+                const enemigo = enemigos_1[i];
+
+                if (enemigo.manejarColision(bala)) {
+                    console.log('Colisión detectada');
+
+                    //Eliminar la bala
+                    balas.splice(balaIndex, 1);
+                    enemigo.puntos_hp--;
+
+                    //Si el enemigo tiene 0 puntos de vida, eliminarlo
+                    if (enemigo.puntos_hp <= 0) {
+                        console.log('Enemigo eliminado');
+                        enemigos_1.splice(i, 1);
+
+                        
+                    }
+                }
+            }
         });
 
-       
+
+
     }
 
 
@@ -204,7 +288,7 @@ function paint() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     player.dibujar();
-    for (let i = 0; i < 30; i++){
+    for (let i = enemigos_1.length - 1; i >= 0; i--) {
         enemigos_1[i].dibujar();
     }
     ctx.font = "30px Georgia";
