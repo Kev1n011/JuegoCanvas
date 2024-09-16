@@ -127,25 +127,22 @@ imagen_bala.onload = function () {
 };
 
 //SONIDOS
-function sonido_disparo() {
-    var audio = new Audio('./sonidos/disparo.wav');
-    audio.volume = 0.1;
-    audio.play();
+const sonido_disparo = new Audio('./Sonidos/disparo.mp3');
+sonido_disparo.volume = 0.1;
 
+const sonido_enemigo_destruido = new Audio('./Sonidos/enemigo_destruido.mp3');
+sonido_enemigo_destruido.volume = 0.060;
 
-}
-function sonido_enemigo_destruido() {
-    var audio = new Audio('./sonidos/enemigo_destruido.wav');
-    audio.volume = 0.060;
-    audio.play()
-}
-function sonido_player_dano() {
-    var audio = new Audio('./sonidos/player_dano.wav');
-    audio.volume = 0.360;
-    audio.play()
-}
-const musica_fondo = new Audio('./Sonidos/Necrofantasia-8-Bit-Remix.wav');
+const sonido_player_dano = new Audio('./Sonidos/player_dano.mp3');
+sonido_player_dano.volume = 0.360;
+
+const musica_fondo = new Audio('./Sonidos/Necrofantasia-8-Bit-Remix.mp3');
 musica_fondo.volume = 0.3;
+
+function reproducirSonido(audio) {
+    audio.currentTime = 0;
+    audio.play();
+}
 
 
 class Player {
@@ -174,7 +171,7 @@ class Player {
             velocidad: velocidad_bala,
             direccion: direccion
         });
-        sonido_disparo();
+        reproducirSonido(sonido_disparo);
     }
 
     manejarColision(bala) {
@@ -241,7 +238,7 @@ class Enemigo {
         enemigos_1.splice(enemigo, 1);
         puntuaciones.push({ x: this.x, y: this.y, texto: "+" + this.valor_puntos, tiempo: 0 });
         bandera_destruido = true;
-        sonido_enemigo_destruido();
+        reproducirSonido(sonido_enemigo_destruido);
 
 
     }
@@ -537,7 +534,7 @@ document.addEventListener("keydown", function (e) {
         } else {
             mostrar_menu_inicio = false;
             setTimeout(() => {
-                musica_fondo.play();
+                reproducirSonido(musica_fondo);
                 musica_fondo.loop = true;
             }, 1000);
         }
@@ -674,7 +671,7 @@ function update() {
                 balas_enemigo.splice(balaIndex, 1);
                 player.puntos_hp--;
                 console.log(player.puntos_hp);
-                sonido_player_dano();
+                reproducirSonido(sonido_player_dano);
 
                 //Si el jugador tiene 0 puntos de vida, eliminarlo
                 if (player.puntos_hp <= 0) {
