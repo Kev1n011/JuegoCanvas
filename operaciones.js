@@ -597,7 +597,7 @@ function update() {
                     if (enemigo.puntos_hp <= 0) {
                         console.log('Enemigo eliminado');
                         score += enemigo.valor_puntos;
-                        enemigos_1.splice(index, 1);
+                        
                         bandera_destruido = true;
                     }
                 }
@@ -811,7 +811,6 @@ window.requestAnimationFrame = (function () {
             window.setTimeout(callback, 17);
         };
 }());
-
 
 
 
