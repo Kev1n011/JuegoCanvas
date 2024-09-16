@@ -96,6 +96,21 @@ player_sprite.onload = function () {
     ctx.drawImage(player_sprite, this.x, this.y, 200, 100);
 };
 
+const vidas_restantes = new Image();
+vidas_restantes.src = "./imagenes/player/vidas.png"
+
+function mostrar_vidas() {
+    const vida_ancho = 50;
+    const vida_alto = 50;
+    const vida_espacio = 10;
+    const vida_x_inicial = 1480;
+    const vida_y = 445;
+
+    for (let i = 0; i < player.puntos_hp; i++) {
+        ctx.drawImage(vidas_restantes, vida_x_inicial + i * (vida_ancho + vida_espacio), vida_y, vida_ancho, vida_alto);
+    }
+}
+
 
 //SPRITES DEL ENEMIGO
 const enemigo_sprite = new Image();
@@ -778,7 +793,8 @@ function paint() {
     ctx.textAlign = "left";
     ctx.fillText("Score:        " + mostrar_puntaje(score), 1300, 130);
     ctx.fillText("Tiempo:       " + mostrar_tiempo(minutos) + ":" + mostrar_tiempo(segundos), 1300, 180);
-    ctx.fillText("Vidas:       " + player.puntos_hp, 1300, 280);
+    ctx.fillText("Vidas:       ", 1300, 480);
+    mostrar_vidas();
 
     if (pausa) {
         ctx.fillStyle = "rgba(100,100,100,.5)"
